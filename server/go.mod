@@ -2,4 +2,10 @@ module github.com/chikanma681/browser-talk
 
 go 1.22.3
 
-require github.com/go-chi/chi/v5 v5.2.3 // indirect
+require (
+	github.com/go-chi/chi/v5 v5.2.3 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
+	github.com/golang/mock v1.6.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/twilio/twilio-go v1.28.4 // indirect
+)

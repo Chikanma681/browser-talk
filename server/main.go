@@ -4,21 +4,25 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
-	"github.com/chikanma681/browser-talk/internal/api"
-	"github.com/chikanma681/browser-talk/internal/routes"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"browser-talk/internal/api"
+	"browser-talk/internal/routes"
+	"github.com/joho/godotenv"  // Add this import
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using environment variables")
+	}
+
 	var port int
 	flag.IntVar(&port, "port", 8080, "BrowserTalk backend port")
 	flag.Parse()
 
-	// Validate required environment variables
 	requiredEnvVars := []string{
 		"TWILIO_ACCOUNT_SID",
 		"TWILIO_AUTH_TOKEN",
@@ -31,36 +35,22 @@ func main() {
 		}
 	}
 
-	// Initialize API handler
 	apiHandler := api.NewHandler()
 
-	// Setup router
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Compress(5))
+	e := echo.New()
 
-	// CORS for browser clients
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-			
-			if r.Method == "OPTIONS" {
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-			
-			next.ServeHTTP(w, r)
-		})
-	})
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.Gzip())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{echo.GET, echo.POST, echo.OPTIONS},
+		AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAuthorization},
+	}))
 
-	// Mount routes
-	routes.SetupRoutes(r, apiHandler)
+	routes.SetupRoutes(e, apiHandler)
 
-	// Start server
 	addr := fmt.Sprintf(":%d", port)
 	log.Printf("🚀 BrowserTalk server starting on http://localhost%s", addr)
-	log.Fatal(http.ListenAndServe(addr, r))
+	e.Logger.Fatal(e.Start(addr))
 }

@@ -1,5 +1,5 @@
 // Download the helper library from https://www.twilio.com/docs/go/install
-package main
+package app
 
 import (
 	"fmt"

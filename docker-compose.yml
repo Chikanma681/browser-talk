@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: "talkDB"
+    image: postgres:15-alpine
+    volumes: 
+      - talkDB_data:/var/lib/postgresql/data
+    ports: 
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: talkdb
+      POSTGRES_USER: talkuser
+      POSTGRES_PASSWORD: talkpassword
+    restart: unless-stopped
+
+volumes:
+  talkDB_data:

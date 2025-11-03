@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-
+	"browser-talk/internal/store"
+	"browser-talk/migrations"
 	"browser-talk/internal/api"
 	"browser-talk/internal/routes"
 	"github.com/joho/godotenv"  // Add this import
@@ -19,6 +20,19 @@ func main() {
 		log.Println("No .env file found, using environment variables")
 	}
 
+
+	// Initialize Database
+	db, err := store.Open();
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	if err := store.MigrateFS(db,migrations.FS, "."); err != nil {
+		log.Fatalf("Failed to run database migrations: %v", err)
+	}
+	log.Println("✅ Migrations completed successfully")
+	
 	var port int
 	flag.IntVar(&port, "port", 8080, "BrowserTalk backend port")
 	flag.Parse()

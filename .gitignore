@@ -1,2 +1,17 @@
 .env
 node_modules
+
+# Next.js
+client/.next/
+client/out/
+client/dist/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+client/next-env.d.ts
